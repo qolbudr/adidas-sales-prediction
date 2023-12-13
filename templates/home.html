@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Conpatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adidas Sales Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+    <header>
+        <h1>ADIDAS PREDICT</h1>
+    </header>
+    <div id="calendar">
+        <input id="month-input" type="month" value="2020-01" name="month">
+        <button onclick="analyzeData()">CARI</button>
+    </div>
+    <nav style="margin: 0">
+        <ul>
+            <li><a class="active" href="#products">Products</a></li>
+            <li><a href="#units">Units Sold</a></li>
+            <li><a href="#totalsales">Total Sales</a></li>
+            <li><a href="#top-sales">Top Sales Prediction</a></li>
+            <li><a href="#low-sales">Low Sales Prediction</a></li>
+        </ul>
+    </nav>
+    <section id="products">
+        <h2>Product Menu</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">Produk tidak ditemukan</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <section id="units">
+        <h2>Units Sold</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Units Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">Produk tidak ditemukan</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <section id="totalsales">
+        <h2>Total Sales</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Total Sales</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="2">Produk tidak ditemukan</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <section id="top-sales">
+        <h2>Top Sales Prediction</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Invoice Date</th>
+                    <th>Retailer</th>
+                    <th>Location</th>
+                    <th>Sales Prediction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="5">Produk tidak ditemukan</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="low-sales">
+        <h2>Low Sales Prediction</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Invoice Date</th>
+                    <th>Retailer</th>
+                    <th>Location</th>
+                    <th>Sales Prediction</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="5">Produk tidak ditemukan</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $("nav li a").click(function() {
+            $("nav li a").removeClass('active')
+            $(this).addClass('active')
+        })
+
+        const numberWithCommas = (x) => {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        const analyzeData = async () => {
+            const month = $("#month-input").val()
+
+            /* -- Product Menu -- */
+            const product_menu_data = await fetch(`/api/product_menu?month=${month}`)
+            const product_menu_json = await product_menu_data.json()
+
+            let product_menu_html = ''
+            if (product_menu_json.length == 0) {
+                product_menu_html += `
+                    <tr>
+                        <td colspan="2">Produk tidak ditemukan</td>
+                    </tr>
+                `
+            } else {
+
+                product_menu_json.forEach((item) => {
+                    product_menu_html += `
+                        <tr>
+                            <td>${item.product}</td>
+                            <td>$${numberWithCommas(item.price)}</td>
+                        </tr>
+                    `
+                })
+            }
+
+            $("#products tbody").html(product_menu_html)
+
+            /* -- Units Sold -- */
+            const units_sold_data = await fetch(`/api/unit_sold?month=${month}`)
+            const units_sold_json = await units_sold_data.json()
+
+            let units_sold_html = ''
+            if (units_sold_json.length == 0) {
+                units_sold_html += `
+                    <tr>
+                        <td colspan="2">Produk tidak ditemukan</td>
+                    </tr>
+                `
+            } else {
+
+                units_sold_json.forEach((item) => {
+                    units_sold_html += `
+                        <tr>
+                            <td>${item.product}</td>
+                            <td>${numberWithCommas(item.unit)} Unit</td>
+                        </tr>
+                    `
+                })
+            }
+
+            $("#units tbody").html(units_sold_html)
+
+            /* -- Units Sold -- */
+            const total_sales_data = await fetch(`/api/total_sales?month=${month}`)
+            const total_sales_json = await total_sales_data.json()
+
+            let total_sales_html = ''
+            if (total_sales_json.length == 0) {
+                total_sales_html += `
+                    <tr>
+                        <td colspan="2">Produk tidak ditemukan</td>
+                    </tr>
+                `
+            } else {
+
+                total_sales_json.forEach((item) => {
+                    total_sales_html += `
+                        <tr>
+                            <td>${item.product}</td>
+                            <td>$${numberWithCommas(item.total_sales.toFixed())}</td>
+                        </tr>
+                    `
+                })
+            }
+
+            $("#totalsales tbody").html(total_sales_html)
+
+            /* -- Top Sales -- */
+            const top_sales_data = await fetch(`/api/predict?month=${month}&ascending=false`)
+            const top_sales_json = await top_sales_data.json()
+
+            let top_sales_html = ''
+            if (top_sales_json.length == 0) {
+                top_sales_html += `
+                    <tr>
+                        <td colspan="2">Produk tidak ditemukan</td>
+                    </tr>
+                `
+            } else {
+                for (let i = 0; i < 5; i++) {
+                    top_sales_html += `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td>${top_sales_json[i].invoice_date}</td>
+                            <td>${top_sales_json[i].retailer}</td>
+                            <td>${top_sales_json[i].region}, ${top_sales_json[i].state}, ${top_sales_json[i].city}</td>
+                            <td>$${numberWithCommas(top_sales_json[i].sales_prediction.toFixed())}</td>
+                        </tr>
+                    `
+                }
+            }
+
+            $("#top-sales tbody").html(top_sales_html)
+
+            /* -- Low Sales -- */
+            const low_sales_data = await fetch(`/api/predict?month=${month}&ascending=true`)
+            const low_sales_json = await low_sales_data.json()
+
+            let low_sales_html = ''
+            if (low_sales_json.length == 0) {
+                low_sales_html += `
+                    <tr>
+                        <td colspan="2">Produk tidak ditemukan</td>
+                    </tr>
+                `
+            } else {
+                for (let i = 0; i < 5; i++) {
+                    low_sales_html += `
+                        <tr>
+                            <td>${i + 1}</td>
+                            <td>${low_sales_json[i].invoice_date}</td>
+                            <td>${low_sales_json[i].retailer}</td>
+                            <td>${low_sales_json[i].region}, ${low_sales_json[i].state}, ${low_sales_json[i].city}</td>
+                            <td>$${numberWithCommas(low_sales_json[i].sales_prediction.toFixed())}</td>
+                        </tr>
+                    `
+                }
+            }
+
+            $("#low-sales tbody").html(low_sales_html)
+
+        }
+
+        analyzeData()
+    </script>
+</body>
+
+</html>
