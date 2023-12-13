@@ -107,3 +107,7 @@ def predict():
     result = result.sort_values(by=['sales_prediction'], ascending=ascending)
 
     return Response(result.to_json(orient="records"), mimetype='application/json')    
+
+
+if __name__ == "__main__":
+    app.run()
